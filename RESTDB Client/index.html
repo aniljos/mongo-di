@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+</head>
+
+<body>
+    <h2>Kibana Client</h2>
+
+    <video id="video1" controls></video>
+
+    <button onclick="load();">Display</button>
+    <script>
+
+        const baseUrl = "http://localhost:3000/";
+
+        // async function callHello() {
+        //     const path = "";
+        //     const url = baseUrl;
+        //     try {
+        //         const resp = await fetch(url, {
+        //             method: "GET"
+        //         });
+        //         const data = await resp.json();
+        //         console.log(data);
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
+
+        // }
+
+        async function callFetchMediaFetch() {
+            const path = "fetchMedia";
+            const url = baseUrl + path;
+            try {
+                const resp = await fetch(url, {
+                    method: "POST",
+                    headers: { 'Content-Type': "application/json" },
+                    body: JSON.stringify({ fileName: "Video1.mp4" })
+                });
+                const buffer = await resp.arrayBuffer();
+                console.log(buffer);
+
+                return buffer;
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+
+        async function callFetchMedia() {
+            const path = "fetchMedia";
+            const url = baseUrl + path;
+            try {
+                const resp = await axios.post(url, { fileName: "Video1.mp4" }, { responseType: 'blob' });
+                const buffer = resp.data;
+                console.log(buffer);
+
+                return buffer;
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        async function load() {
+            const videoControl = document.getElementById('video1');
+            var mimeCodec = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+
+            if (MediaSource.isTypeSupported(mimeCodec)) {
+                console.log("Mime supported");
+            } else {
+                console.log("Mime not supported");
+            }
+
+            const myMediaSource = new MediaSource();
+
+            const mediaurl = window.URL.createObjectURL(myMediaSource);
+            videoControl.src = mediaurl;
+
+
+
+
+            myMediaSource.addEventListener("sourceopen", async () => {
+
+                console.log("source open..");
+
+                const videoSourceBuffer = myMediaSource
+                    .addSourceBuffer(mimeCodec);
+
+                // videoSourceBuffer.addEventListener("updateend", function(){
+                //     console.log("updateend")
+                //     myMediaSource.endOfStream();
+                //     videoControl.play();
+                // })
+
+                const path = "fetchMedia";
+                const url = baseUrl + path;
+
+                try {
+                    const resp = await axios.post(url, { fileName: "Video1.mp4" }, { responseType: 'blob' });
+                    const buffer = resp.data;
+                    console.log(buffer);
+                    videoSourceBuffer.appendBuffer(buffer);
+                    
+                } catch (error) {
+                    console.log(error);
+                }
+
+                
+                
+
+                // try {
+                //     const resp = await fetch(url, {
+                //         method: "POST",
+                //         headers: {'Content-Type': "application/json"},
+                //         body: JSON.stringify({ fileName: "Video1.mp4" })
+                //     });
+                //     const buffer = await resp.arrayBuffer();
+                //     console.log(buffer);
+                //     videoSourceBuffer.appendBuffer(buffer);
+                //     //videoControl.play();
+
+                // } catch (error) {
+                //     console.log(error);
+                // }
+
+            });
+
+        }
+
+        console.log("Started")
+        //callHello();
+        //const data = callFetchMedia();
+        //console.log("data", data);
+
+
+    </script>
+</body>
+
+</html>
